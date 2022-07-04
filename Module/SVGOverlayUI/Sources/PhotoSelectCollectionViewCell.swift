@@ -17,7 +17,7 @@ public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
   }
   
   // MARK: - UI
-  public let imageView: UIImageView = UIImageView()
+  public let assetImageView: UIImageView = UIImageView()
   
   
   // MARK: - Initializing
@@ -35,9 +35,9 @@ public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
   // MARK: - Life Cycle
   override public func layoutSubviews() {
     // add subview on contentView to use touch responder chain
-    self.contentView.addSubview(imageView)
+    self.contentView.addSubview(assetImageView)
     
-    self.imageView.pin
+    self.assetImageView.pin
       .all()
   }
 }
