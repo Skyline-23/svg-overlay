@@ -9,6 +9,7 @@ let project = Project(
     .rxSwift,
     .rxKingfisher,
     .pinLayout,
+    .then,
   ],
   settings: .settings(
     base: [:],
@@ -34,6 +35,7 @@ let project = Project(
       .rxCocoa,
       .rxKingfisher,
       .pinLayout,
+      .then,
     ],
     testDependencies: []
   ),
