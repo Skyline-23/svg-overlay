@@ -17,7 +17,8 @@ import Photos
 
 final class PhotoPickerReactor: Reactor {
   
-  typealias ImageSectionModel = SectionModel<String, PHAsset>
+  typealias ImageSectionModel = AnimatableSectionModel<String, PHAsset>
+  typealias AlbumSectionModel = AnimatableSectionModel<String, AlbumCover>
   
   let initialState: State
   
@@ -33,7 +34,9 @@ final class PhotoPickerReactor: Reactor {
   struct State {
     var albumIndex: Int = 0
     var album: [Album] = []
+    var title: String? = .init()
     var imageSection: [ImageSectionModel] = []
+    var albumSection: [AlbumSectionModel] = []
   }
   
   let photoService: PhotoLibServiceType = PhotoLibService()
@@ -58,6 +61,16 @@ final class PhotoPickerReactor: Reactor {
     switch mutation {
     case let .updateAlbum(album):
       state.album = album
+      state.title = album[state.albumIndex].name
+      
+      // update for tableView
+      state.albumSection = [AlbumSectionModel(
+        model: "",
+        items: zip(album.compactMap { $0.name }, album.map { $0.asset.firstObject })
+          .map { AlbumCover(name: $0, coverAsset: $1) }
+      )]
+      
+      // update for collectionView
       let result = album[state.albumIndex].asset
       let indexSet = IndexSet(integersIn: 0..<result.count)
       state.imageSection = [ImageSectionModel(

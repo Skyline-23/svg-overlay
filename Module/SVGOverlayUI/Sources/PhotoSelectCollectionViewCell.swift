@@ -33,6 +33,11 @@ public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
   }
   
   // MARK: - Life Cycle
+  override public func prepareForReuse() {
+    super.prepareForReuse()
+    self.assetImageView.image = nil
+  }
+  
   override public func layoutSubviews() {
     // add subview on contentView to use touch responder chain
     self.contentView.addSubview(assetImageView)

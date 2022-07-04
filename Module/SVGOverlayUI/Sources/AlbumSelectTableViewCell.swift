@@ -15,6 +15,8 @@ public final class AlbumSelectTableViewCell: UITableViewCell {
   fileprivate struct Metric {
     static let cornerRadius: CGFloat = 8
     static let albumImageSize: CGFloat = 64
+    static let imageLeft: CGFloat = 15
+    static let titleAfter: CGFloat = 10
   }
   
   // MARK: - UI
@@ -37,6 +39,12 @@ public final class AlbumSelectTableViewCell: UITableViewCell {
   }
   
   // MARK: - Life Cycle
+  override public func prepareForReuse() {
+    super.prepareForReuse()
+    self.albumImageView.image = nil
+    self.albumTitleLabel.text = ""
+  }
+  
   override public func layoutSubviews() {
     // add subview on contentView to use touch responder chain
     [
@@ -47,10 +55,11 @@ public final class AlbumSelectTableViewCell: UITableViewCell {
     self.albumImageView.pin
       .vCenter()
       .size(Metric.albumImageSize)
+      .left(Metric.imageLeft)
     
     self.albumTitleLabel.pin
       .vCenter()
       .sizeToFit()
-      .after(of: albumImageView).margin(10)
+      .after(of: albumImageView).margin(Metric.titleAfter)
   }
 }

@@ -13,3 +13,13 @@ public struct Album {
   public let name: String?
   public let asset: PHFetchResult<PHAsset>
 }
+
+public struct AlbumCover: Equatable {
+  public let name: String
+  public let coverAsset: PHAsset?
+  
+  public init(name: String, coverAsset: PHAsset?) {
+    self.name = name
+    self.coverAsset = coverAsset
+  }
+}
