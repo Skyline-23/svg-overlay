@@ -7,9 +7,7 @@ public extension TargetDependency {
   static let rxFlow: TargetDependency = .package(product: "RxFlow")
   static let rxDataSources: TargetDependency = .package(product: "RxDataSources")
   static let reactorKit: TargetDependency = .package(product: "ReactorKit")
-  
-  // Network
-  static let rxMoya: TargetDependency = .package(product: "RxMoya")
+  static let then: TargetDependency = .package(product: "Then")
   
   // UI
   static let snapKit: TargetDependency = .package(product: "SnapKit")
@@ -36,6 +34,11 @@ public extension Package {
   static let rxDataSources: Package = .package(
     url: "https://github.com/RxSwiftCommunity/RxDataSources.git",
     .upToNextMajor(from: "5.0.0")
+  )
+  
+  static let then: Package = .package(
+    url: "https://github.com/devxoul/Then.git",
+    .branch("master")
   )
   
   // UI

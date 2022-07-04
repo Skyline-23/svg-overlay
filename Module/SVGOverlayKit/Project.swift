@@ -5,6 +5,7 @@ let project = Project(
   name: "SVGOverlaytKit",
   organizationName: "com.skyline-23",
   packages: [
+    .rxSwift,
   ],
   settings: .settings(
     base: [:],
@@ -25,6 +26,7 @@ let project = Project(
   targets: Project.staticFameworkTarget(
     name: "SVGOverlayKit",
     frameworkDepencies: [
+      .rxSwift,
     ],
     testDependencies: []
   ),

@@ -8,6 +8,7 @@ let project = Project(
     .rxDataSources,
     .reactorKit,
     .rxFlow,
+    .then,
   ],
   settings: .settings(
     base: [
@@ -35,6 +36,7 @@ let project = Project(
       .rxDataSources,
       .reactorKit,
       .rxFlow,
+      .then,
     ],
     testDependencies: []
   ),

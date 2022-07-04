@@ -21,6 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     self.window = window
     window.makeKeyAndVisible()
     
+    window.rootViewController = PhotoPickerViewController(reactor: PhotoPickerReactor())
   }
   
   func sceneDidDisconnect(_ scene: UIScene) {
