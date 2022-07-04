@@ -26,7 +26,7 @@ let project = Project(
     ],
     defaultSettings: .recommended
   ),
-  targets: Project.staticFameworkTarget(
+  targets: Project.userInterfaceFrameworkTarget(
     name: "SVGOverlayUI",
     frameworkDepencies: [
       .snapKit,
