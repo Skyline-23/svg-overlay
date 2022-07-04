@@ -7,7 +7,6 @@ let project = Project(
   packages: [
     .snapKit,
     .rxSwift,
-    .rxKingfisher,
     .pinLayout,
     .then,
   ],
@@ -33,7 +32,6 @@ let project = Project(
       .snapKit,
       .rxSwift,
       .rxCocoa,
-      .rxKingfisher,
       .pinLayout,
       .then,
     ],

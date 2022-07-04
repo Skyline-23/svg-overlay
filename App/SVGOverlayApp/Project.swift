@@ -9,6 +9,7 @@ let project = Project(
     .reactorKit,
     .rxFlow,
     .then,
+    .rxGesture,
   ],
   settings: .settings(
     base: [
@@ -37,6 +38,7 @@ let project = Project(
       .reactorKit,
       .rxFlow,
       .then,
+      .rxGesture,
     ],
     testDependencies: []
   ),

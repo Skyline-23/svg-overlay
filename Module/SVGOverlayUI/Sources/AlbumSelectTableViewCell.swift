@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Then
+
 import PinLayout
 
 public final class AlbumSelectTableViewCell: UITableViewCell {
@@ -20,7 +22,12 @@ public final class AlbumSelectTableViewCell: UITableViewCell {
   }
   
   // MARK: - UI
-  public let albumImageView: UIImageView = UIImageView()
+  public let albumImageView: UIImageView = UIImageView().then {
+    $0.backgroundColor = .lightGray
+    $0.image = UIImage.init(systemName: "photo.on.rectangle")
+    $0.tintColor = .gray
+    $0.contentMode = .scaleAspectFit
+  }
   public let albumTitleLabel: UILabel = UILabel()
   
   
@@ -41,7 +48,8 @@ public final class AlbumSelectTableViewCell: UITableViewCell {
   // MARK: - Life Cycle
   override public func prepareForReuse() {
     super.prepareForReuse()
-    self.albumImageView.image = nil
+    self.albumImageView.image = UIImage.init(systemName: "photo.on.rectangle")
+    self.albumImageView.contentMode = .scaleAspectFit
     self.albumTitleLabel.text = ""
   }
   

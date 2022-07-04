@@ -12,7 +12,7 @@ public extension TargetDependency {
   // UI
   static let snapKit: TargetDependency = .package(product: "SnapKit")
   static let pinLayout: TargetDependency = .package(product: "PinLayout")
-  static let rxKingfisher: TargetDependency = .package(product: "RxKingfisher")
+  static let rxGesture: TargetDependency = .package(product: "RxGesture")
 }
 
 public extension Package {
@@ -52,9 +52,9 @@ public extension Package {
     .upToNextMajor(from: "1.10.0")
   )
   
-  static let rxKingfisher: Package = .package(
-    url: "https://github.com/RxSwiftCommunity/RxKingfisher.git",
-    .upToNextMajor(from: "2.0.0")
+  static let rxGesture: Package = .package(
+    url: "https://github.com/RxSwiftCommunity/RxGesture.git",
+    .branch("main")
   )
 }
 

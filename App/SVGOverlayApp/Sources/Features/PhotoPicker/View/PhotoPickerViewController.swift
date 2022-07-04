@@ -13,6 +13,7 @@ import ReactorKit
 import RxDataSources
 import RxFlow
 import Then
+import RxGesture
 
 import SVGOverlayUI
 import SVGOverlayKit
@@ -39,6 +40,8 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     static let titleLabelBottom: CGFloat = 16
     
     static let tableViewCellHeight: CGFloat = 84
+    
+    static let dropImageViewLeft: CGFloat = 15
   }
   
   fileprivate struct Font {
@@ -48,11 +51,16 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
   // MARK: - UI
   fileprivate let topBarView = UIView.init()
   fileprivate let topBarBottomLine = UIView().then {
-    $0.backgroundColor = SVGOverlayUIAsset.overlayTopbarGray.color
+    $0.backgroundColor = SVGOverlayUIAsset.Colors.overlayTopbarGray.color
   }
   fileprivate let titleLabel = UILabel().then {
     $0.font = Font.titleFont
     $0.textColor = .black
+    $0.adjustsFontSizeToFitWidth = true
+    $0.textAlignment = .center
+  }
+  fileprivate let dropDownImageView = UIImageView().then {
+    $0.image = SVGOverlayUIAsset.Images.dropDownButton.image
   }
   
   fileprivate var collectionView: UICollectionView = {
@@ -74,10 +82,11 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     tableView.register(AlbumSelectTableViewCell.self, forCellReuseIdentifier: "AlbumSelectTableViewCell")
     tableView.contentInset = UIEdgeInsets(top: Metric.tableMarginTop, left: Metric.tableMarginSide, bottom: Metric.tableMarginBottom, right: Metric.tableMarginSide)
     tableView.separatorStyle = .none
+    tableView.alpha = 0
     return tableView
   }()
   
-  lazy var collectionDataSource = RxCollectionViewSectionedAnimatedDataSource<Reactor.ImageSectionModel> { dataSource, collectionView, indexPath, item in
+  lazy var collectionDataSource = RxCollectionViewSectionedReloadDataSource<Reactor.ImageSectionModel> { dataSource, collectionView, indexPath, item in
     guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoSelectCollectionViewCell", for: indexPath) as? PhotoSelectCollectionViewCell else { return UICollectionViewCell() }
     
     self.reactor?.photoService.loadImage(asset: item, size: CGSize(width: cell.frame.width, height: cell.frame.height)) {
@@ -87,12 +96,13 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     return cell
   }
   
-  lazy var tableDataSource = RxTableViewSectionedAnimatedDataSource<Reactor.AlbumSectionModel> { dataSource, tableView, indexPath, item in
+  lazy var tableDataSource = RxTableViewSectionedReloadDataSource<Reactor.AlbumSectionModel> { dataSource, tableView, indexPath, item in
     guard let cell = tableView.dequeueReusableCell(withIdentifier: "AlbumSelectTableViewCell", for: indexPath) as? AlbumSelectTableViewCell else { return UITableViewCell() }
     
     if let asset = item.coverAsset {
       self.reactor?.photoService.loadImage(asset: asset, size: CGSize(width: cell.frame.width, height: cell.frame.height)) {
         cell.albumImageView.image = $0
+        cell.albumImageView.contentMode = .scaleAspectFill
       }
     }
     cell.albumTitleLabel.text = item.name
@@ -126,6 +136,8 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     
     self.topBarBottomLine.addSubview(self.titleLabel)
     
+    self.topBarBottomLine.addSubview(self.dropDownImageView)
+    
     self.view.addSubview(self.collectionView)
     
     self.view.addSubview(self.tableView)
@@ -148,6 +160,11 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     self.titleLabel.pin
       .hCenter()
       .bottom(Metric.titleLabelBottom)
+      .sizeToFit(.width)
+      .width(100)
+    
+    self.dropDownImageView.pin
+      .after(of: titleLabel, aligned: .center).margin(Metric.dropImageViewLeft)
       .sizeToFit()
     
     self.collectionView.pin
@@ -179,6 +196,20 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
       .setDelegate(self)
       .disposed(by: disposeBag)
     
+    self.tableView.rx.itemSelected.asObservable()
+      .do(onNext: { [weak self] _ in
+        self?.switchDropDown()
+      })
+      .map { Reactor.Action.chooseAlbum($0.row) }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    self.topBarView.rx.tapGesture()
+      .when(.recognized)
+      .subscribe(onNext: { [weak self] _ in
+        self?.switchDropDown()
+      }).disposed(by: disposeBag)
+    
     reactor.state.map { $0.imageSection }
       .distinctUntilChanged()
       .bind(to: self.collectionView.rx.items(dataSource: self.collectionDataSource))
@@ -193,6 +224,19 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
       .distinctUntilChanged()
       .bind(to: self.titleLabel.rx.text)
       .disposed(by: disposeBag)
+  }
+  
+  func switchDropDown() {
+    UIView.animate(withDuration: 0.4) { [weak self] in
+      guard let self = self else { return }
+      if self.tableView.alpha == 0 {
+        self.tableView.alpha = 1
+        self.dropDownImageView.transform = CGAffineTransform.init(rotationAngle: .pi)
+      } else {
+        self.tableView.alpha = 0
+        self.dropDownImageView.transform = .identity
+      }
+    }
   }
   
   
@@ -220,7 +264,7 @@ extension PhotoPickerViewController: UICollectionViewDelegateFlowLayout {
   }
   
   func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-    return UIEdgeInsets(top: Metric.collectionMarginTop, left: Metric.collectionMarginSide, bottom: -Metric.collectionMarginTop, right: -Metric.collectionMarginSide)
+    return UIEdgeInsets(top: Metric.collectionMarginTop, left: Metric.collectionMarginSide, bottom: -Metric.collectionMarginTop, right: Metric.collectionMarginSide)
   }
   
 }
@@ -229,6 +273,10 @@ extension PhotoPickerViewController: UICollectionViewDelegateFlowLayout {
 extension PhotoPickerViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
     return Metric.tableViewCellHeight
+  }
+  
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    print(indexPath)
   }
 }
 

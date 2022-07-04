@@ -29,6 +29,7 @@ final class PhotoPickerReactor: Reactor {
   
   enum Mutation {
     case updateAlbum([Album])
+    case updateCurrentAlbum(Int)
   }
   
   struct State {
@@ -48,7 +49,7 @@ final class PhotoPickerReactor: Reactor {
   func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case let .chooseAlbum(index):
-      return .empty()
+      return Observable.just(.updateCurrentAlbum(index))
       
     case .fetchAlbum:
       return photoService.fetchListAlbums()
@@ -72,6 +73,15 @@ final class PhotoPickerReactor: Reactor {
       
       // update for collectionView
       let result = album[state.albumIndex].asset
+      let indexSet = IndexSet(integersIn: 0..<result.count)
+      state.imageSection = [ImageSectionModel(
+        model: "",
+        items: result.objects(at: indexSet)
+      )]
+    case let .updateCurrentAlbum(index):
+      state.albumIndex = index
+      state.title = state.album[index].name
+      let result = state.album[index].asset
       let indexSet = IndexSet(integersIn: 0..<result.count)
       state.imageSection = [ImageSectionModel(
         model: "",

@@ -1,15 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "kingfisher",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher.git",
-      "state" : {
-        "revision" : "1a0c2df04b31ed7aa318354f3583faea24f006fc",
-        "version" : "5.15.8"
-      }
-    },
-    {
       "identity" : "pinlayout",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/layoutBox/PinLayout.git",
@@ -46,12 +37,12 @@
       }
     },
     {
-      "identity" : "rxkingfisher",
+      "identity" : "rxgesture",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/RxSwiftCommunity/RxKingfisher.git",
+      "location" : "https://github.com/RxSwiftCommunity/RxGesture.git",
       "state" : {
-        "revision" : "5f195d1c9a21e3ca930d1bfef24335c8b752ea64",
-        "version" : "2.1.0"
+        "branch" : "main",
+        "revision" : "e9f94dfd39efe5b2914ac9463d4193b9e340779c"
       }
     },
     {
