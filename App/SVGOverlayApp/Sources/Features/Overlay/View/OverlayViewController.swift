@@ -18,6 +18,7 @@ import RxGesture
 
 import SVGOverlayUI
 import Photos
+import SVGOverlayKit
 
 final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.Stepper {
   
@@ -198,6 +199,9 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
       .disposed(by: disposeBag)
     
     self.collectionView.rx.itemSelected
+      .do(onNext: { _ in
+        HapticFeedback.selectionFeedback()
+      })
       .map { Reactor.Action.chooseSVG($0.row) }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
@@ -237,10 +241,19 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
   }
   
   @objc func saveCompleted(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-    let alert = UIAlertController(title: "이미지 저장 성공!", message: nil, preferredStyle: .alert)
-    let action = UIAlertAction(title: "확인", style: .default) { [weak self] _ in self?.steps.accept(OverlayStep.dismiss) }
-    alert.addAction(action)
-    self.present(alert, animated: true)
+    if let error = error {
+      HapticFeedback.notificationFeedback(type: .error)
+      let alert = UIAlertController(title: "에러 발생!", message: error.localizedDescription, preferredStyle: .alert)
+      let action = UIAlertAction(title: "확인", style: .default) { [weak self] _ in self?.steps.accept(OverlayStep.dismiss) }
+      alert.addAction(action)
+      self.present(alert, animated: true)
+    } else {
+      HapticFeedback.notificationFeedback(type: .success)
+      let alert = UIAlertController(title: "이미지 저장 성공!", message: nil, preferredStyle: .alert)
+      let action = UIAlertAction(title: "확인", style: .default) { [weak self] _ in self?.steps.accept(OverlayStep.dismiss) }
+      alert.addAction(action)
+      self.present(alert, animated: true)
+    }
   }
   
 }
