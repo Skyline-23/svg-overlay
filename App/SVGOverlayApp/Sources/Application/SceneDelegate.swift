@@ -7,11 +7,16 @@
 
 import UIKit
 
+import RxSwift
+import RxFlow
+
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   var window: UIWindow?
   
+  var coordinator: FlowCoordinator = .init()
+  fileprivate let disposeBag = DisposeBag()
   
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     
@@ -21,7 +26,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     self.window = window
     window.makeKeyAndVisible()
     
-    window.rootViewController = PhotoPickerViewController(reactor: PhotoPickerReactor())
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    let appFlow = AppFlow(window: window, container: appDelegate.container)
+    let appStepper = OneStepper(withSingleStep: OverlayStep.photoPickerIsRequired)
+    
+    // Setup Rxflow
+    self.coordinator.coordinate(flow: appFlow, with: appStepper)
+    
+    
+    coordinator.rx.willNavigate.subscribe(onNext: { (flow, step) in
+        print ("will navigate to flow=\(flow) and step=\(step)")
+    }).disposed(by: self.disposeBag)
+    
+    coordinator.rx.didNavigate.subscribe(onNext: { (flow, step) in
+        print ("did navigate to flow=\(flow) and step=\(step)")
+    }).disposed(by: self.disposeBag)
   }
   
   func sceneDidDisconnect(_ scene: UIScene) {

@@ -10,6 +10,7 @@ import SVGOverlayKit
 import Photos
 
 import Differentiator
+import UIKit
 
 extension PHAsset: IdentifiableType {
   public var identity: String {
@@ -20,5 +21,11 @@ extension PHAsset: IdentifiableType {
 extension AlbumCover: IdentifiableType {
   public var identity: String {
     return self.name
+  }
+}
+
+extension UIImage: IdentifiableType {
+  public var identity: String {
+    return self.accessibilityIdentifier ?? ""
   }
 }

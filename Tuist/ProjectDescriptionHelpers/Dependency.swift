@@ -8,6 +8,7 @@ public extension TargetDependency {
   static let rxDataSources: TargetDependency = .package(product: "RxDataSources")
   static let reactorKit: TargetDependency = .package(product: "ReactorKit")
   static let then: TargetDependency = .package(product: "Then")
+  static let swinject: TargetDependency = .package(product: "Swinject")
   
   // UI
   static let snapKit: TargetDependency = .package(product: "SnapKit")
@@ -38,6 +39,11 @@ public extension Package {
   
   static let then: Package = .package(
     url: "https://github.com/devxoul/Then.git",
+    .branch("master")
+  )
+  
+  static let swinject: Package = .package(
+    url: "https://github.com/Swinject/Swinject.git",
     .branch("master")
   )
   

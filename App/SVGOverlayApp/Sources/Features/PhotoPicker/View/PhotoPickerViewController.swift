@@ -89,10 +89,7 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
   lazy var collectionDataSource = RxCollectionViewSectionedReloadDataSource<Reactor.ImageSectionModel> { dataSource, collectionView, indexPath, item in
     guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoSelectCollectionViewCell", for: indexPath) as? PhotoSelectCollectionViewCell else { return UICollectionViewCell() }
     
-    self.reactor?.photoService.loadImage(asset: item, size: CGSize(width: cell.frame.width * UIScreen.main.scale, height: cell.frame.height * UIScreen.main.scale)) {
-      cell.assetImageView.image = $0
-    }
-    
+    cell.loadImage(asset: item)
     return cell
   }
   
@@ -100,10 +97,7 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     guard let cell = tableView.dequeueReusableCell(withIdentifier: "AlbumSelectTableViewCell", for: indexPath) as? AlbumSelectTableViewCell else { return UITableViewCell() }
     
     if let asset = item.coverAsset {
-      self.reactor?.photoService.loadImage(asset: asset, size: CGSize(width: cell.frame.width, height: cell.frame.height)) {
-        cell.albumImageView.image = $0
-        cell.albumImageView.contentMode = .scaleAspectFill
-      }
+      cell.loadImage(asset: asset)
     }
     cell.albumTitleLabel.text = item.name
     
@@ -134,9 +128,9 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     
     self.view.addSubview(self.topBarBottomLine)
     
-    self.topBarBottomLine.addSubview(self.titleLabel)
+    self.topBarView.addSubview(self.titleLabel)
     
-    self.topBarBottomLine.addSubview(self.dropDownImageView)
+    self.topBarView.addSubview(self.dropDownImageView)
     
     self.view.addSubview(self.collectionView)
     
@@ -203,6 +197,12 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
       .map { Reactor.Action.chooseAlbum($0.row) }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
+    
+    self.collectionView.rx.itemSelected
+      .subscribe(onNext: { [weak self] indexPath in
+        let state = reactor.currentState
+        self?.steps.accept(OverlayStep.overlayIsRequired(state.imageSection[indexPath.section].items[indexPath.row]))
+      }).disposed(by: disposeBag)
     
     self.topBarView.rx.tapGesture()
       .when(.recognized)

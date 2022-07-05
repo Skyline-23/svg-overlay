@@ -16,7 +16,6 @@ public protocol PhotoLibServiceType: AnyObject {
   /// 사진 앱 권한
   func requestPhotosPermission() -> PHAuthorizationStatus
   func fetchListAlbums() -> Observable<[Album]>
-  func loadImage(asset: PHAsset, size: CGSize, completion: @escaping (UIImage?) -> ())
 }
 
 /// Photo Service Class
@@ -28,7 +27,6 @@ open class PhotoLibService: PhotoLibServiceType {
   //  private collections
   private var smartAlbums = PHFetchResult<PHAssetCollection>()
   private var userCollections = PHFetchResult<PHAssetCollection>()
-  
   private var manager = PHCachingImageManager()
   
   
@@ -55,13 +53,6 @@ open class PhotoLibService: PhotoLibServiceType {
     album.append(contentsOf: userCollections.toAlbumArray())
     
     return Observable.just(album)
-  }
-  
-  
-  public func loadImage(asset: PHAsset, size: CGSize, completion: @escaping (UIImage?) -> ()) {
-    self.manager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: nil) { image, _ in
-      completion(image)
-    }
   }
   
 }

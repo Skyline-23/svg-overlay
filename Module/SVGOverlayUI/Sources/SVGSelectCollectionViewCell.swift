@@ -1,29 +1,26 @@
 //
-//  PhotoSelectCollectionViewCell.swift
+//  SVGSelectCollectionViewCell.swift
 //  SVGOverlayUI
 //
-//  Created by 김부성 on 2022/07/04.
+//  Created by 김부성 on 2022/07/05.
 //  Copyright © 2022 com.skyline-23. All rights reserved.
 //
 
 import UIKit
-import Photos
 
 import Then
 import PinLayout
 
-public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
-  
-  private let cacheManager = PHCachingImageManager()
+public final class SVGSelectCollectionViewCell: UICollectionViewCell {
   
   // MARK: - Const
   fileprivate struct Metric {
-    static let cornerRadius: CGFloat = 16
+    static let imageInset: CGFloat = 12
   }
   
   // MARK: - UI
   public let assetImageView: UIImageView = UIImageView().then {
-    $0.contentMode = .scaleAspectFill
+    $0.contentMode = .scaleAspectFit
   }
   
   
@@ -31,7 +28,8 @@ public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
   override init(frame: CGRect) {
     super.init(frame: frame)
     
-    self.layer.cornerRadius = Metric.cornerRadius
+    self.layer.borderColor = UIColor.black.cgColor
+    self.layer.borderWidth = 1
     self.clipsToBounds = true
   }
   
@@ -50,13 +48,7 @@ public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
     self.contentView.addSubview(assetImageView)
     
     self.assetImageView.pin
-      .all()
+      .all(Metric.imageInset)
   }
   
-  public func loadImage(asset: PHAsset) {
-    let size = CGSize(width: self.frame.width * UIScreen.main.scale, height: self.frame.height * UIScreen.main.scale)
-    self.cacheManager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: nil) { [weak self] image, _ in
-      self?.assetImageView.image = image
-    }
-  }
 }

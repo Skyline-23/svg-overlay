@@ -10,6 +10,7 @@ let project = Project(
     .rxFlow,
     .then,
     .rxGesture,
+    .swinject,
   ],
   settings: .settings(
     base: [
@@ -39,6 +40,7 @@ let project = Project(
       .rxFlow,
       .then,
       .rxGesture,
+      .swinject,
     ],
     testDependencies: []
   ),

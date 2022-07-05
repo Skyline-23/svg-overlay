@@ -6,14 +6,16 @@
 //  Copyright © 2022 com.skyline-23. All rights reserved.
 //
 
+import UIKit
+import Photos
 
-import Foundation
 import ReactorKit
 import RxRelay
 import RxFlow
 import RxDataSources
+import Swinject
+
 import SVGOverlayKit
-import Photos
 
 final class PhotoPickerReactor: Reactor {
   
@@ -21,6 +23,7 @@ final class PhotoPickerReactor: Reactor {
   typealias AlbumSectionModel = AnimatableSectionModel<String, AlbumCover>
   
   let initialState: State
+  let container: Container
   
   enum Action {
     case fetchAlbum
@@ -40,11 +43,12 @@ final class PhotoPickerReactor: Reactor {
     var albumSection: [AlbumSectionModel] = []
   }
   
-  let photoService: PhotoLibServiceType = PhotoLibService()
-  init() {
+  var photoLibService: PhotoLibServiceType?
+  init(container: Container) {
     self.initialState = State()
+    self.container = Container(parent: container)
+    self.photoLibService = self.container.resolve(PhotoLibServiceType.self)
   }
-  
   
   func mutate(action: Action) -> Observable<Mutation> {
     switch action {
@@ -52,7 +56,8 @@ final class PhotoPickerReactor: Reactor {
       return Observable.just(.updateCurrentAlbum(index))
       
     case .fetchAlbum:
-      return photoService.fetchListAlbums()
+      guard let photoLibService = photoLibService else { return .empty() }
+      return photoLibService.fetchListAlbums()
         .map { Mutation.updateAlbum($0) }
     }
   }
@@ -79,6 +84,7 @@ final class PhotoPickerReactor: Reactor {
         model: "",
         items: result.objects(at: indexSet)
       )]
+      
     case let .updateCurrentAlbum(index):
       state.albumIndex = index
       state.title = state.album[index].name

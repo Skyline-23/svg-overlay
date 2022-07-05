@@ -6,12 +6,15 @@
 //  Copyright © 2022 com.skyline-23. All rights reserved.
 //
 
+import Photos
 import UIKit
 import Then
 
 import PinLayout
 
 public final class AlbumSelectTableViewCell: UITableViewCell {
+  
+  private let cacheManager = PHCachingImageManager()
   
   // MARK: - Const
   fileprivate struct Metric {
@@ -69,5 +72,13 @@ public final class AlbumSelectTableViewCell: UITableViewCell {
       .vCenter()
       .sizeToFit()
       .after(of: albumImageView).margin(Metric.titleAfter)
+  }
+  
+  public func loadImage(asset: PHAsset) {
+    let size = CGSize(width: self.frame.width * UIScreen.main.scale, height: self.frame.height * UIScreen.main.scale)
+    self.cacheManager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: nil) { [weak self] image, _ in
+      self?.albumImageView.contentMode = .scaleAspectFill
+      self?.albumImageView.image = image
+    }
   }
 }
