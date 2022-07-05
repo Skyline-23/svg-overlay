@@ -7,6 +7,8 @@
 //
 
 import UIKit
+
+import Then
 import PinLayout
 
 public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
@@ -17,7 +19,9 @@ public final class PhotoSelectCollectionViewCell: UICollectionViewCell {
   }
   
   // MARK: - UI
-  public let assetImageView: UIImageView = UIImageView()
+  public let assetImageView: UIImageView = UIImageView().then {
+    $0.contentMode = .scaleAspectFill
+  }
   
   
   // MARK: - Initializing

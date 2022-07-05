@@ -60,7 +60,8 @@ final class PhotoPickerReactor: Reactor {
   func reduce(state: State, mutation: Mutation) -> State {
     var state = state
     switch mutation {
-    case let .updateAlbum(album):
+    case var .updateAlbum(album):
+      album = album.filter { $0.asset.firstObject != nil }
       state.album = album
       state.title = album[state.albumIndex].name
       

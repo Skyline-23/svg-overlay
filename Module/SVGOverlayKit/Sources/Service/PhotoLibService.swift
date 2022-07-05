@@ -31,13 +31,6 @@ open class PhotoLibService: PhotoLibServiceType {
   
   private var manager = PHCachingImageManager()
   
-  fileprivate let fetchOptions = PHFetchOptions().then {
-    $0.sortDescriptors = [
-      NSSortDescriptor(
-        key: "creationDate",
-        ascending: false)
-    ]
-  }
   
   public init() {
     // fetch Albums

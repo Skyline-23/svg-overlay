@@ -20,7 +20,7 @@ extension PHFetchResult where ObjectType == PHAssetCollection {
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
         
-        let newAlbum = Album(name: obj.localizedTitle, asset: PHAsset.fetchAssets(in: obj, options: nil))
+        let newAlbum = Album(name: obj.localizedTitle, asset: PHAsset.fetchAssets(in: obj, options: fetchOptions))
         album.append(newAlbum)
       }
     }

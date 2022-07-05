@@ -89,7 +89,7 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
   lazy var collectionDataSource = RxCollectionViewSectionedReloadDataSource<Reactor.ImageSectionModel> { dataSource, collectionView, indexPath, item in
     guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoSelectCollectionViewCell", for: indexPath) as? PhotoSelectCollectionViewCell else { return UICollectionViewCell() }
     
-    self.reactor?.photoService.loadImage(asset: item, size: CGSize(width: cell.frame.width, height: cell.frame.height)) {
+    self.reactor?.photoService.loadImage(asset: item, size: CGSize(width: cell.frame.width * UIScreen.main.scale, height: cell.frame.height * UIScreen.main.scale)) {
       cell.assetImageView.image = $0
     }
     
@@ -211,6 +211,9 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
       }).disposed(by: disposeBag)
     
     reactor.state.map { $0.imageSection }
+      .do(onNext: { [weak self] _ in
+        self?.collectionView.setContentOffset(.zero, animated: false)
+      })
       .distinctUntilChanged()
       .bind(to: self.collectionView.rx.items(dataSource: self.collectionDataSource))
       .disposed(by: self.disposeBag)
@@ -264,7 +267,7 @@ extension PhotoPickerViewController: UICollectionViewDelegateFlowLayout {
   }
   
   func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-    return UIEdgeInsets(top: Metric.collectionMarginTop, left: Metric.collectionMarginSide, bottom: -Metric.collectionMarginTop, right: Metric.collectionMarginSide)
+    return UIEdgeInsets(top: Metric.collectionMarginTop, left: Metric.collectionMarginSide, bottom: Metric.collectionMarginTop, right: Metric.collectionMarginSide)
   }
   
 }
