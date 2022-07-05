@@ -16,6 +16,7 @@ public protocol PhotoLibServiceType: AnyObject {
   /// 사진 앱 권한
   func requestPhotosPermission() -> PHAuthorizationStatus
   func fetchListAlbums() -> Observable<[Album]>
+  func registerPhotoLibrary(object: PHPhotoLibraryChangeObserver)
 }
 
 /// Photo Service Class
@@ -31,6 +32,20 @@ open class PhotoLibService: PhotoLibServiceType {
   
   
   public init() {
+    
+  }
+  
+  public func requestPhotosPermission() -> PHAuthorizationStatus {
+    return PHPhotoLibrary.authorizationStatus()
+  }
+  
+  public func registerPhotoLibrary(object: PHPhotoLibraryChangeObserver) {
+    PHPhotoLibrary.shared().register(object)
+  }
+  
+  public func fetchListAlbums() -> Observable<[Album]> {
+    var album: [Album] = .init()
+    
     // fetch Albums
     smartAlbums = PHAssetCollection.fetchAssetCollections(
       with: .smartAlbum,
@@ -40,14 +55,6 @@ open class PhotoLibService: PhotoLibServiceType {
       with: .album,
       subtype: .any,
       options: nil)
-  }
-  
-  public func requestPhotosPermission() -> PHAuthorizationStatus {
-    return PHPhotoLibrary.authorizationStatus()
-  }
-  
-  public func fetchListAlbums() -> Observable<[Album]> {
-    var album: [Album] = .init()
     
     album.append(contentsOf: smartAlbums.toAlbumArray())
     album.append(contentsOf: userCollections.toAlbumArray())

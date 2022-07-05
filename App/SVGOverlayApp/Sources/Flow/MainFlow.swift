@@ -53,8 +53,6 @@ final class MainFlow: Flow {
       self.rootViewController.dismiss(animated: true, completion: nil)
       return .none
       
-    default:
-      return .none
     }
   }
   

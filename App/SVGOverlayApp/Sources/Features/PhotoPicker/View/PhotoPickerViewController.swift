@@ -17,10 +17,12 @@ import RxGesture
 
 import SVGOverlayUI
 import SVGOverlayKit
+import Photos
 
 final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFlow.Stepper {
   
   var steps: PublishRelay<Step> = .init()
+  var albumUpdated: PublishRelay<Void> = .init()
   typealias Reactor = PhotoPickerReactor
   
   fileprivate struct Metric {
@@ -177,7 +179,14 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
   
   // MARK: - Binding
   func bind(reactor: Reactor) {
+    reactor.photoLibService?.registerPhotoLibrary(object: self)
+    
     self.rx.viewDidLoad.asObservable()
+      .map { Reactor.Action.fetchAlbum }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    self.albumUpdated.asObservable()
       .map { Reactor.Action.fetchAlbum }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
@@ -201,7 +210,7 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
     self.collectionView.rx.itemSelected
       .subscribe(onNext: { [weak self] indexPath in
         let state = reactor.currentState
-        self?.steps.accept(OverlayStep.overlayIsRequired(state.imageSection[indexPath.section].items[indexPath.row]))
+        self?.steps.accept(OverlayStep.overlayIsRequired(state.imageSection[0].items[indexPath.row]))
       }).disposed(by: disposeBag)
     
     self.topBarView.rx.tapGesture()
@@ -211,6 +220,7 @@ final class PhotoPickerViewController: BaseViewController, ReactorKit.View, RxFl
       }).disposed(by: disposeBag)
     
     reactor.state.map { $0.imageSection }
+      .observe(on: MainScheduler.instance)
       .do(onNext: { [weak self] _ in
         self?.collectionView.setContentOffset(.zero, animated: false)
       })
@@ -283,3 +293,12 @@ extension PhotoPickerViewController: UITableViewDelegate {
   }
 }
 
+// MARK: - UICollectionView Extension
+extension PhotoPickerViewController: PHPhotoLibraryChangeObserver {
+  
+  func photoLibraryDidChange(_ changeInstance: PHChange) {
+    self.albumUpdated.accept(Void())
+  }
+  
+ 
+}

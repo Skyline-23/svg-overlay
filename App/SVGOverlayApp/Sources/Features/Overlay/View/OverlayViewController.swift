@@ -65,7 +65,9 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
   }
   
   // MARK: - UI
-  fileprivate let topBarView = UIView.init()
+  fileprivate let topBarView = UIView.init().then {
+    $0.backgroundColor = .systemBackground
+  }
   fileprivate let topBarBottomLine = UIView().then {
     $0.backgroundColor = SVGOverlayUIAsset.Colors.overlayTopbarGray.color
   }
@@ -81,6 +83,7 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
   
   fileprivate let backgroundImageView = UIImageView().then {
     $0.contentMode = .scaleAspectFill
+    $0.clipsToBounds = true
   }
   
   fileprivate let svgView = UIImageView().then {
@@ -176,8 +179,7 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
       .bottom(self.view.pin.safeArea.bottom)
     
     self.backgroundImageView.pin
-      .below(of: topBarBottomLine)
-      .above(of: collectionView)
+      .verticallyBetween(topBarBottomLine, and: collectionView)
       .left()
       .right()
     
@@ -205,6 +207,12 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
         self?.steps.accept(OverlayStep.dismiss)
       }).disposed(by: disposeBag)
     
+    self.overlayButton.rx.tap
+      .subscribe(onNext: { [weak self] in
+        guard let self = self else { return }
+        UIImageWriteToSavedPhotosAlbum(self.backgroundImageView.asImage(), self, #selector(self.saveCompleted), nil)
+      }).disposed(by: disposeBag)
+    
     reactor.state.map { $0.imageSection }
       .distinctUntilChanged()
       .bind(to: self.collectionView.rx.items(dataSource: self.collectionDataSource))
@@ -214,7 +222,10 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
       .distinctUntilChanged()
       .subscribe(onNext: { [weak self] in
         guard let self = self else { return }
-        self.cacheManager.requestImage(for: $0, targetSize: CGSize(width: self.backgroundImageView.frame.width * UIScreen.main.scale, height: self.backgroundImageView.frame.height * UIScreen.main.scale), contentMode: .aspectFill, options: nil) { [weak self] image, _ in
+        let option = PHImageRequestOptions()
+        option.version = .current
+        option.isNetworkAccessAllowed = true
+        self.cacheManager.requestImage(for: $0, targetSize: .zero, contentMode: .aspectFill, options: option) { [weak self] image, _ in
           self?.backgroundImageView.image = image
         }
       }).disposed(by: disposeBag)
@@ -223,6 +234,13 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
       .distinctUntilChanged()
       .bind(to: self.svgView.rx.image)
       .disposed(by: disposeBag)
+  }
+  
+  @objc func saveCompleted(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+    let alert = UIAlertController(title: "이미지 저장 성공!", message: nil, preferredStyle: .alert)
+    let action = UIAlertAction(title: "확인", style: .default) { [weak self] _ in self?.steps.accept(OverlayStep.dismiss) }
+    alert.addAction(action)
+    self.present(alert, animated: true)
   }
   
 }
@@ -245,4 +263,13 @@ extension OverlayViewController: UICollectionViewDelegateFlowLayout {
     return UIEdgeInsets(top: Metric.collectionMarginTop, left: Metric.collectionMarginSide, bottom: Metric.collectionMarginTop, right: Metric.collectionMarginSide)
   }
   
+}
+
+extension UIView {
+  func asImage() -> UIImage {
+    let renderer = UIGraphicsImageRenderer(bounds: bounds)
+    return renderer.image { rendererContext in
+      layer.render(in: rendererContext.cgContext)
+    }
+  }
 }
