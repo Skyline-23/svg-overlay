@@ -34,6 +34,7 @@ final class OverlayReactor: Reactor {
   struct State {
     var selectedIndex: Int = 0
     var backgroundImage: PHAsset
+    var selectedImage: UIImage? = nil
     var imageSection: [ImageSectionModel] = [ImageSectionModel(
       model: "",
       items: [
@@ -70,6 +71,7 @@ final class OverlayReactor: Reactor {
     switch mutation {
     case let .updateIndex(index):
       state.selectedIndex = index
+      state.selectedImage = state.imageSection.first?.items[index]
     }
     return state
   }

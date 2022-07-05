@@ -7,6 +7,7 @@
 //
 
 import UIKit
+
 import RxSwift
 import RxCocoa
 import ReactorKit
@@ -41,6 +42,22 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
     static let tableViewCellHeight: CGFloat = 84
     
     static let dropImageViewLeft: CGFloat = 15
+    
+    static let buttonWidth: CGFloat = 103
+    static let buttonHeight: CGFloat = 33
+    
+    static let collectionViewHeight: CGFloat = 150
+    
+    static let collectionViewCellSize: CGFloat = 80
+    
+    static let overlayButtonRight: CGFloat = 20
+    static let overlayButtonBottom: CGFloat = 15
+    
+    static let closeButtonSize: CGFloat = 12
+    static let closeButtonBottom: CGFloat = 22
+    static let closeButtonLeft: CGFloat = 30
+    
+    static let svgViewSide: CGFloat = 60
   }
   
   fileprivate struct Font {
@@ -52,8 +69,22 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
   fileprivate let topBarBottomLine = UIView().then {
     $0.backgroundColor = SVGOverlayUIAsset.Colors.overlayTopbarGray.color
   }
+  fileprivate let overlayButton = OverlayBlackButton(type: .system).then {
+    $0.setTitle("Overlay", for: .normal)
+    $0.layer.cornerRadius = Metric.buttonHeight / 2
+  }
+  
+  fileprivate let closeButton = UIButton(type: .system).then {
+    $0.setBackgroundImage(UIImage(systemName: "xmark"), for: .normal)
+    $0.tintColor = .black
+  }
+  
   fileprivate let backgroundImageView = UIImageView().then {
     $0.contentMode = .scaleAspectFill
+  }
+  
+  fileprivate let svgView = UIImageView().then {
+    $0.contentMode = .scaleAspectFit
   }
   
   fileprivate var collectionView: UICollectionView = {
@@ -100,9 +131,15 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
   override func setupLayout() {
     self.view.addSubview(self.topBarView)
     
+    self.topBarView.addSubview(self.overlayButton)
+    
+    self.topBarView.addSubview(self.closeButton)
+    
     self.view.addSubview(self.topBarBottomLine)
     
-    self.topBarView.addSubview(self.backgroundImageView)
+    self.view.addSubview(self.backgroundImageView)
+    
+    self.backgroundImageView.addSubview(self.svgView)
     
     self.view.addSubview(self.collectionView)
   }
@@ -115,6 +152,17 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
       .right()
       .height(Metric.topBarHeight)
     
+    self.overlayButton.pin
+      .right(Metric.overlayButtonRight)
+      .bottom(Metric.overlayButtonBottom)
+      .width(Metric.buttonWidth)
+      .height(Metric.buttonHeight)
+    
+    self.closeButton.pin
+      .size(Metric.closeButtonSize)
+      .bottom(Metric.closeButtonBottom)
+      .left(Metric.closeButtonLeft)
+    
     self.topBarBottomLine.pin
       .below(of: self.topBarView)
       .left()
@@ -124,7 +172,7 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
     self.collectionView.pin
       .left()
       .right()
-      .height(150)
+      .height(Metric.collectionViewHeight)
       .bottom(self.view.pin.safeArea.bottom)
     
     self.backgroundImageView.pin
@@ -133,6 +181,11 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
       .left()
       .right()
     
+    self.svgView.pin
+      .left(Metric.svgViewSide)
+      .right(Metric.svgViewSide)
+      .height(self.svgView.frame.width)
+      .vCenter()
   }
   
   // MARK: - Binding
@@ -147,6 +200,11 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
+    self.closeButton.rx.tap
+      .subscribe(onNext: { [weak self] in
+        self?.steps.accept(OverlayStep.dismiss)
+      }).disposed(by: disposeBag)
+    
     reactor.state.map { $0.imageSection }
       .distinctUntilChanged()
       .bind(to: self.collectionView.rx.items(dataSource: self.collectionDataSource))
@@ -160,6 +218,11 @@ final class OverlayViewController: BaseViewController, ReactorKit.View, RxFlow.S
           self?.backgroundImageView.image = image
         }
       }).disposed(by: disposeBag)
+    
+    reactor.state.map { $0.selectedImage }
+      .distinctUntilChanged()
+      .bind(to: self.svgView.rx.image)
+      .disposed(by: disposeBag)
   }
   
 }
@@ -169,7 +232,7 @@ extension OverlayViewController: UICollectionViewDelegateFlowLayout {
   func collectionView(_ collectionView: UICollectionView,
                       layout collectionViewLayout: UICollectionViewLayout,
                       sizeForItemAt indexPath: IndexPath) -> CGSize {
-    return CGSize(width: 80, height: 80)
+    return CGSize(width: Metric.collectionViewCellSize, height: Metric.collectionViewCellSize)
   }
   
   func collectionView(_ collectionView: UICollectionView,
